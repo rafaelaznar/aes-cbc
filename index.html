@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encriptación y Desencriptación</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+
+        function encrypt(plainText, secret) {
+            let key = CryptoJS.enc.Utf8.parse(secret);
+            let iv = CryptoJS.lib.WordArray.create(key.words.slice(0, 4));
+            console.log("Encript");
+            console.log("Key : " + key);
+            console.log("IV : " + CryptoJS.enc.Base64.stringify(iv));
+            // Encrypt the plaintext
+            let cipherText = CryptoJS.AES.encrypt(plainText, key, {
+                iv: iv,
+                mode: CryptoJS.mode.CBC,
+                padding: CryptoJS.pad.Pkcs7
+            });
+            return cipherText.toString();
+        }
+
+        function decrypt(cipherText, secret) {
+            const key = CryptoJS.enc.Utf8.parse(secret);
+            const iv = CryptoJS.lib.WordArray.create(key.words.slice(0, 4));
+            console.log("Decript");
+            console.log("Key : " + key);  
+            console.log("IV : " + CryptoJS.enc.Base64.stringify(iv));                          
+            var cipherBytes = CryptoJS.enc.Base64.parse(cipherText);
+            let decrypted = CryptoJS.AES.decrypt({ ciphertext: cipherBytes }, key, {
+                iv: iv,
+                mode: CryptoJS.mode.CBC,
+                padding: CryptoJS.pad.Pkcs7
+            });
+
+            return decrypted.toString(CryptoJS.enc.Utf8);
+        }
+
+        function encriptar() {
+            const texto = document.getElementById('texto-a-encriptar').value;
+            const clave = document.getElementById('clave-encriptar').value;
+            //const textoEncriptado = CryptoJS.AES.encrypt(texto, clave).toString();
+            const textoEncriptado = encrypt(texto, clave).toString();
+            document.getElementById('texto-encriptado').innerText = textoEncriptado;
+        }
+
+        function desencriptar() {
+            const texto = document.getElementById('texto-a-desencriptar').value;
+            const clave = document.getElementById('clave-desencriptar').value;
+            //const key = CryptoJS.enc.Utf8.parse(clave);
+            // iv is a base64 string
+            //const iv = CryptoJS.enc.Base64.stringify(CryptoJS.lib.WordArray.random(16));
+            //console.log("IV : " + iv);
+           
+            
+            try {
+                const bytes = decrypt(texto, clave);
+                const textoDesencriptado = bytes.toString(CryptoJS.enc.Utf8);
+                document.getElementById('texto-desencriptado').innerText = textoDesencriptado || "Clave incorrecta";
+            } catch (error) {
+                document.getElementById('texto-desencriptado').innerText = "Clave incorrecta";
+            }
+        }
+
+        function copiarTextArea(origin, destination) {
+            const texto = document.getElementById(origin).innerText;
+            document.getElementById(destination).value = texto;
+        }
+
+        function copiarText(origin, destination) {
+            const texto = document.getElementById(origin).value;
+            document.getElementById(destination).value = texto;
+        }
+
+        function comparar() {
+            const original = document.getElementById('texto-a-encriptar').value;
+            const desencriptado = document.getElementById('texto-desencriptado').innerText;
+            alert(original === desencriptado ? "Los textos coinciden" : "Los textos no coinciden");
+        }
+
+        function reset() {
+            document.getElementById('texto-a-encriptar').value = "";
+            document.getElementById('clave-encriptar').value = "";
+            document.getElementById('texto-encriptado').innerText = "";
+            document.getElementById('texto-a-desencriptar').value = "";
+            document.getElementById('clave-desencriptar').value = "";
+            document.getElementById('texto-desencriptado').innerText = "";
+        }
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        textarea {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            height: 100px;
+        }
+
+
+        input[type="text"] {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+
+
+        .output {
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+
+        button {
+            margin-right: 10px;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Aplicación de Encriptación y Desencriptación</h1>
+    <p>Introduce un texto y una clave para encriptar y desencriptar mensajes de forma segura.</p>
+
+    <section>
+        <h2>Zona de Encriptación</h2>
+        <textarea id="texto-a-encriptar" placeholder="Texto a encriptar"></textarea>
+        <input type="text" id="clave-encriptar" placeholder="Clave de encriptación">
+        <div class="output" id="texto-encriptado"></div>
+        <button onclick="encriptar()">Encriptar</button>
+        <button onclick="copiarTextArea('texto-encriptado', 'texto-a-desencriptar')">Copiar a Desencriptar</button>
+        <button onclick="copiarText('clave-encriptar','clave-desencriptar')">Copiar Clave</button>
+    </section>
+
+    <section>
+        <h2>Zona de Desencriptación</h2>
+        <textarea id="texto-a-desencriptar" placeholder="Texto a desencriptar"></textarea>
+        <input type="text" id="clave-desencriptar" placeholder="Clave de desencriptación">
+        <div class="output" id="texto-desencriptado"></div>
+        <button onclick="desencriptar()">Desencriptar</button>
+        <button onclick="comparar()">Comparar Texto Original</button>
+        <button onclick="reset()">Reset</button>
+    </section>
+</body>
+
+</html>
