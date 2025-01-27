@@ -4,60 +4,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Encriptación y Desencriptación</title>
+    <title>AES+3DES</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
 
-        function encrypt(plainText, secret) {
-            let key = CryptoJS.enc.Utf8.parse(secret);
-            let iv = CryptoJS.lib.WordArray.create(key.words.slice(0, 4));
-            console.log("Encript");
-            console.log("Key : " + key);
-            console.log("IV : " + CryptoJS.enc.Base64.stringify(iv));
-            // Encrypt the plaintext
-            let cipherText = CryptoJS.AES.encrypt(plainText, key, {
-                iv: iv,
-                mode: CryptoJS.mode.CBC,
-                padding: CryptoJS.pad.Pkcs7
-            });
-            return cipherText.toString();
-        }
-
-        function decrypt(cipherText, secret) {
-            const key = CryptoJS.enc.Utf8.parse(secret);
-            const iv = CryptoJS.lib.WordArray.create(key.words.slice(0, 4));
-            console.log("Decript");
-            console.log("Key : " + key);  
-            console.log("IV : " + CryptoJS.enc.Base64.stringify(iv));                          
-            var cipherBytes = CryptoJS.enc.Base64.parse(cipherText);
-            let decrypted = CryptoJS.AES.decrypt({ ciphertext: cipherBytes }, key, {
-                iv: iv,
-                mode: CryptoJS.mode.CBC,
-                padding: CryptoJS.pad.Pkcs7
-            });
-
-            return decrypted.toString(CryptoJS.enc.Utf8);
+        function encriptarAES(texto, clave) {
+            return CryptoJS.AES.encrypt(texto, clave).toString();
         }
 
         function encriptar() {
             const texto = document.getElementById('texto-a-encriptar').value;
             const clave = document.getElementById('clave-encriptar').value;
-            //const textoEncriptado = CryptoJS.AES.encrypt(texto, clave).toString();
-            const textoEncriptado = encrypt(texto, clave).toString();
-            document.getElementById('texto-encriptado').innerText = textoEncriptado;
+            const textoEncriptado1 = CryptoJS.AES.encrypt(texto, clave).toString(); 
+            const textoEncriptado2 = CryptoJS.TripleDES.encrypt(textoEncriptado1, clave).toString();
+            document.getElementById('texto-encriptado').innerText = textoEncriptado2;
         }
 
         function desencriptar() {
             const texto = document.getElementById('texto-a-desencriptar').value;
             const clave = document.getElementById('clave-desencriptar').value;
-            //const key = CryptoJS.enc.Utf8.parse(clave);
-            // iv is a base64 string
-            //const iv = CryptoJS.enc.Base64.stringify(CryptoJS.lib.WordArray.random(16));
-            //console.log("IV : " + iv);
-           
-            
             try {
-                const bytes = decrypt(texto, clave);
+                const bytes2 = CryptoJS.TripleDES.decrypt(texto, clave);
+                const textoDesencriptado2 = bytes2.toString(CryptoJS.enc.Utf8);
+                const bytes = CryptoJS.AES.decrypt(textoDesencriptado2, clave);
                 const textoDesencriptado = bytes.toString(CryptoJS.enc.Utf8);
                 document.getElementById('texto-desencriptado').innerText = textoDesencriptado || "Clave incorrecta";
             } catch (error) {
@@ -118,6 +87,10 @@
             background: #f9f9f9;
             border: 1px solid #ccc;
             margin-bottom: 10px;
+            overflow-y: auto;
+            word-wrap: break-word;
+            font-size: 0.8em;
+            font-family: monospace;
         }
 
         button {
@@ -137,7 +110,7 @@
 </head>
 
 <body>
-    <h1>Aplicación de Encriptación y Desencriptación</h1>
+    <h1>AES+3DES</h1>
     <p>Introduce un texto y una clave para encriptar y desencriptar mensajes de forma segura.</p>
 
     <section>
